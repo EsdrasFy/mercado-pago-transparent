@@ -79,12 +79,12 @@ routes.post("/checkout", CreateToken, async (req, res) => {
         return value;
       };
   
-      const response = await payment.create({
+      payment.create({
         body: {
-          transaction_amount: req.body.transactionAmount,
+          transaction_amount: Number(req.body.transactionAmount),
           token: req.middlewareToken,
           description: req.body.description,
-          installments: req.body.installments,
+          installments: Number(req.body.installments),
           payment_method_id: req.body.payment_method_id,
           issuer_id: req.body.issuer_id,
           payer: {
@@ -96,20 +96,22 @@ routes.post("/checkout", CreateToken, async (req, res) => {
           },
         },
         requestOptions: { idempotencyKey: getTransactionAmount() },
+      })
+      .then(function (data) {
+        console.log(data);
+        
+        res.status(201).json({
+          detail: data.status_detail,
+          status: data.status,
+          id: data.id,
+        });
+      })
+      .catch(function (error) {
+        console.log(error);
+          
       });
       
-      console.log("teste4");
-      const { status, status_detail, id, card, payment_method, date_approved } = response;
-      console.log("teste5");
   
-      return res.status(201).json({
-        status,
-        status_detail,
-        id,
-        card,
-        payment_method,
-        date_approved,
-      });
     } catch (err:any) {
       console.log("teste6");
       console.log(err);
